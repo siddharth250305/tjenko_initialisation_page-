@@ -1,0 +1,1158 @@
+---
+/**
+ * IntroScreen.astro
+ * ─────────────────────────────────────────────────────────────────────────────
+ * Tjenko — Isometric Voxel Cityscape Initialization Overlay
+ *
+ * Full-viewport Three.js scene showing a dense, isometric voxel city with the
+ * Tjenko block monogram at its center, green circuit traces, and staggered
+ * block pop-in animation. HUD overlays display "INITIALIZING", a progress bar,
+ * "SYSTEM CALIBRATION IN PROGRESS", and floating node cards.
+ *
+ * Enhanced with: block pulsing, fog,
+ * smooth camera orbit, progress sparks,
+ * and block glow emission.
+ */
+---
+
+<!-- Three.js Library CDN -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js" is:inline></script>
+
+<!-- Block homepage paint while intro is active -->
+<script is:inline>
+  if (sessionStorage.getItem('tjenko-intro-done') === 'true') {
+    document.documentElement.classList.add('tjenko-intro-done');
+    document.write('<style>#tjenko-intro { display: none !important; }</style>');
+  } else {
+    document.documentElement.classList.add('tjenko-intro-active');
+  }
+</script>
+
+<!-- ═══════════════════════════════════════════════════════════════════════ -->
+<!--  INTRO OVERLAY CONTAINER                                                -->
+<!-- ═══════════════════════════════════════════════════════════════════════ -->
+<div
+  id="tjenko-intro"
+  aria-modal="true"
+  role="dialog"
+  aria-label="Tjenko brand initialization"
+>
+  <!-- Black flash overlay -->
+  <div class="intro-flash"></div>
+
+
+
+
+  <!-- Full-Viewport 3D Isometric Cityscape Canvas -->
+  <canvas id="tjenko-city-canvas"></canvas>
+
+  <!-- ── HUD Overlay Layer ── -->
+  <div class="intro-hud-layer">
+    <!-- Top-left: Status Badge -->
+    <div class="hud-top-left">
+      <span class="badge-pulse-dot"></span>
+      <span class="hud-badge-text">SYS: ACTIVE · AI NETWORK INITIALIZING</span>
+    </div>
+
+    <!-- Top-right: System info -->
+    <div class="hud-top-right">
+      <span class="hud-sys-line">[SYS_VER: 4.2.1]</span>
+      <span class="hud-sys-line">NODE_COUNT: 4</span>
+    </div>
+
+    <!-- Center Branding Block -->
+    <div class="intro-center-block">
+
+
+      <div class="intro-progress-row">
+        <div class="progress-track">
+          <div class="progress-fill" id="intro-progress-fill">
+            <div class="progress-spark" id="intro-progress-spark"></div>
+          </div>
+        </div>
+        <span class="progress-pct" id="intro-progress-pct">0%</span>
+      </div>
+
+      <p class="intro-calibration-text">SYSTEM CALIBRATION IN PROGRESS</p>
+
+      <!-- CTA Action Button -->
+      <div class="intro-action-container">
+        <button id="intro-enter-btn" class="intro-enter-btn" type="button">
+          <span class="btn-text">ENTER NETWORK</span>
+          <svg class="arrow-icon" width="16" height="16" viewBox="0 0 16 16" fill="none">
+            <path d="M3 8H13M13 8L8 3M13 8L8 13" stroke="currentColor" stroke-width="2.5" stroke-linecap="square"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- Bottom-left telemetry -->
+    <div class="hud-bottom-left">
+      <span id="hud-fps-text" class="hud-mono-text">TX_SYS_OK // FPS: 60.0</span>
+    </div>
+
+    <!-- Bottom-right version -->
+    <div class="hud-bottom-right">
+      <span class="hud-mono-text">TJENKO™ v4.2.1</span>
+    </div>
+  </div>
+
+
+
+  <!-- Bottom Metrics/Stats Strip -->
+  <div class="intro-bottom-bar" aria-hidden="true">
+    <div class="metrics-inner">
+      <div class="metric-item">
+        <span class="metric-num" data-target="48200">0</span>
+        <span class="metric-label">ATTENDEES CONNECTED</span>
+      </div>
+      <div class="metric-sep"></div>
+      <div class="metric-item">
+        <span class="metric-num" data-target="12800">0</span>
+        <span class="metric-label">AI MATCHES MADE</span>
+      </div>
+      <div class="metric-sep"></div>
+      <div class="metric-item">
+        <span class="metric-num" data-target="94" data-suffix="%">0</span>
+        <span class="metric-label">CONNECTION RATE</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════════════ -->
+<!--  STYLING                                                                -->
+<!-- ═══════════════════════════════════════════════════════════════════════ -->
+<style>
+  #tjenko-intro {
+    /* Theme Tokens */
+    --c-ivory: #FFF8E7;
+    --c-black: #010400;
+    --c-spec: #0052F5;
+    --c-corn: #70A0FF;
+    --c-green: #91CB3E;
+    --f-disp: "Arial Black", "Impact", "Helvetica Neue", sans-serif;
+    --f-mono: "IBM Plex Mono", "SFMono-Regular", "Menlo", monospace;
+    --border: 3px solid var(--c-black);
+    --shadow: 5px 5px 0px var(--c-black);
+
+    position: fixed;
+    inset: 0;
+    z-index: 99999;
+    overflow: hidden;
+    background: #001030;
+    user-select: none;
+    will-change: opacity, transform;
+    clip-path: inset(100% 0% 0% 0%);
+    animation: clip-reveal 800ms cubic-bezier(0.16, 1, 0.3, 1) 80ms forwards;
+  }
+
+  @keyframes clip-reveal {
+    to { clip-path: inset(0% 0% 0% 0%); }
+  }
+
+  /* Black flash overlay */
+  .intro-flash {
+    position: absolute;
+    inset: 0;
+    background: var(--c-black);
+    z-index: 100;
+    pointer-events: none;
+    animation: flash-out 300ms ease-out 60ms forwards;
+  }
+  @keyframes flash-out {
+    to { opacity: 0; }
+  }
+
+
+
+
+  /* Full-Viewport 3D Canvas */
+  #tjenko-city-canvas {
+    position: absolute;
+    inset: 0;
+    width: 100% !important;
+    height: 100% !important;
+    display: block;
+    z-index: 1;
+  }
+
+
+
+  /* ─── HUD Overlay Layer ──────────────────────────────────────────────── */
+  .intro-hud-layer {
+    position: absolute;
+    inset: 0;
+    z-index: 10;
+    pointer-events: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .hud-top-left {
+    position: absolute;
+    top: 24px;
+    left: 24px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    opacity: 0;
+    transform: translateY(-10px);
+    animation: slide-down-fade 500ms ease-out 1200ms forwards;
+  }
+
+  .hud-top-right {
+    position: absolute;
+    top: 24px;
+    right: 24px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 3px;
+    opacity: 0;
+    transform: translateY(-10px);
+    animation: slide-down-fade 500ms ease-out 1400ms forwards;
+  }
+
+  .hud-bottom-left {
+    position: absolute;
+    bottom: 70px;
+    left: 24px;
+    opacity: 0;
+    animation: fade-in 500ms ease-out 1800ms forwards;
+  }
+
+  .hud-bottom-right {
+    position: absolute;
+    bottom: 70px;
+    right: 24px;
+    opacity: 0;
+    animation: fade-in 500ms ease-out 1800ms forwards;
+  }
+
+  @keyframes slide-down-fade {
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes fade-in {
+    to { opacity: 1; }
+  }
+
+  .badge-pulse-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background-color: var(--c-green);
+    box-shadow: 0 0 6px var(--c-green);
+    animation: dot-pulse 1s ease-in-out infinite alternate;
+  }
+  @keyframes dot-pulse {
+    from { opacity: 0.3; transform: scale(0.85); }
+    to { opacity: 1; transform: scale(1.15); }
+  }
+
+  .hud-badge-text {
+    font-family: var(--f-mono);
+    font-size: 0.6rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    color: var(--c-ivory);
+    background: rgba(0, 0, 0, 0.5);
+    padding: 4px 10px;
+    border: 1px solid rgba(255, 248, 231, 0.15);
+  }
+
+  .hud-sys-line {
+    font-family: var(--f-mono);
+    font-size: 0.52rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    color: rgba(255, 248, 231, 0.5);
+  }
+
+  .hud-mono-text {
+    font-family: var(--f-mono);
+    font-size: 0.52rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    color: rgba(255, 248, 231, 0.45);
+  }
+
+
+  /* ─── Center Branding Block ──────────────────────────────────────────── */
+  .intro-center-block {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    pointer-events: auto;
+    gap: 0.5rem;
+  }
+
+
+
+  /* Progress Bar */
+  .intro-progress-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 280px;
+    max-width: 80vw;
+    opacity: 0;
+    animation: fade-in 400ms ease-out 1300ms forwards;
+  }
+
+  .progress-track {
+    flex: 1;
+    height: 6px;
+    background: rgba(255, 248, 231, 0.12);
+    border: 1px solid rgba(255, 248, 231, 0.2);
+    overflow: hidden;
+    position: relative;
+  }
+
+  .progress-fill {
+    width: 0%;
+    height: 100%;
+    background: var(--c-green);
+    box-shadow: 0 0 8px var(--c-green);
+    transition: width 100ms linear;
+    position: relative;
+  }
+
+  /* Progress Bar Spark Effect */
+  .progress-spark {
+    position: absolute;
+    right: -2px;
+    top: -6px;
+    width: 4px;
+    height: 18px;
+    pointer-events: none;
+    opacity: 0;
+  }
+  .progress-spark::before,
+  .progress-spark::after {
+    content: '';
+    position: absolute;
+    border-radius: 50%;
+    background: var(--c-green);
+    animation: spark-fly 400ms ease-out infinite;
+  }
+  .progress-spark::before {
+    width: 3px;
+    height: 3px;
+    top: 0;
+    left: 0;
+    box-shadow: 0 0 6px var(--c-green), 0 0 12px rgba(145, 203, 62, 0.5);
+    animation-delay: 0ms;
+  }
+  .progress-spark::after {
+    width: 2px;
+    height: 2px;
+    top: 2px;
+    left: 2px;
+    box-shadow: 0 0 4px var(--c-green);
+    animation-delay: 200ms;
+  }
+
+  @keyframes spark-fly {
+    0% {
+      transform: translate(0, 0) scale(1);
+      opacity: 1;
+    }
+    50% {
+      transform: translate(var(--spark-dx, 3px), var(--spark-dy, -8px)) scale(0.7);
+      opacity: 0.6;
+    }
+    100% {
+      transform: translate(var(--spark-dx2, 5px), var(--spark-dy2, -14px)) scale(0);
+      opacity: 0;
+    }
+  }
+
+  .progress-pct {
+    font-family: var(--f-disp);
+    font-size: 1rem;
+    font-weight: 900;
+    color: var(--c-green);
+    min-width: 3ch;
+    text-align: right;
+    text-shadow: 0 0 8px rgba(145, 203, 62, 0.5);
+  }
+
+  .intro-calibration-text {
+    font-family: var(--f-mono);
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    color: rgba(255, 248, 231, 0.6);
+    margin: 0.25rem 0 0;
+    opacity: 0;
+    animation: fade-in 500ms ease-out 1500ms forwards;
+  }
+
+  /* CTA Button */
+  .intro-action-container {
+    margin-top: 1.5rem;
+    opacity: 0;
+    transform: translateY(15px);
+    animation: slide-up-fade 600ms cubic-bezier(0.16, 1, 0.3, 1) 2200ms forwards;
+  }
+
+  .intro-enter-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.8rem 1.8rem;
+    background: var(--c-green);
+    color: var(--c-black);
+    font-family: var(--f-mono);
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    border: var(--border);
+    box-shadow: var(--shadow);
+    cursor: pointer;
+    pointer-events: auto;
+    transition: transform 150ms, box-shadow 150ms;
+  }
+  .intro-enter-btn:hover {
+    transform: translate(-3px, -3px);
+    box-shadow: 8px 8px 0px var(--c-black);
+  }
+  .intro-enter-btn:active {
+    transform: translate(2px, 2px);
+    box-shadow: 2px 2px 0px var(--c-black);
+  }
+
+  .arrow-icon {
+    transition: transform 150ms ease;
+  }
+  .intro-enter-btn:hover .arrow-icon {
+    transform: translateX(4px);
+  }
+
+  @keyframes slide-up-fade {
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ─── Node Cards ──────────────────────────────────────────────────────── */
+
+
+  /* ─── Bottom Metrics Bar ──────────────────────────────────────────────── */
+  .intro-bottom-bar {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: var(--c-ivory);
+    border-top: 3px solid var(--c-black);
+    padding: 0.85rem 1.25rem;
+    z-index: 15;
+    opacity: 0;
+    transform: translateY(100%);
+    animation: bottom-bar-reveal 600ms cubic-bezier(0.16, 1, 0.3, 1) 2400ms forwards;
+    backdrop-filter: blur(8px);
+  }
+  @keyframes bottom-bar-reveal {
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .metrics-inner {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+  }
+
+  .metric-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+  }
+
+  .metric-num {
+    font-family: var(--f-disp);
+    font-size: 1.2rem;
+    font-weight: 900;
+    color: var(--c-black);
+    line-height: 1;
+  }
+
+  .metric-label {
+    font-family: var(--f-mono);
+    font-size: 0.55rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    color: rgba(1, 4, 0, 0.6);
+  }
+
+  .metric-sep {
+    width: 2px;
+    height: 1.5rem;
+    background: rgba(1, 4, 0, 0.15);
+  }
+
+  /* ─── Exit Dismiss Animation ──────────────────────────────────────────── */
+  #tjenko-intro.intro-exiting {
+    pointer-events: none;
+    animation: exit-out 750ms cubic-bezier(0.55, 0, 1, 1) forwards;
+  }
+  @keyframes exit-out {
+    0% { opacity: 1; transform: scale(1); filter: blur(0px); }
+    100% { opacity: 0; transform: scale(1.06); filter: blur(12px); }
+  }
+
+
+
+  .intro-enter-btn.loading {
+    background: var(--c-spec) !important;
+    color: var(--c-ivory) !important;
+    cursor: wait !important;
+    pointer-events: none !important;
+    transform: translate(-3px, -3px) !important;
+    box-shadow: 8px 8px 0px var(--c-black) !important;
+  }
+  .intro-enter-btn.loading .arrow-icon {
+    transform: rotate(90deg) scale(0.8);
+    opacity: 0.5;
+  }
+
+  #tjenko-intro.intro-rendering .intro-center-block {
+    transform: scale(0.96);
+    filter: blur(1.5px);
+    opacity: 0.5;
+    transition: transform 1.8s ease-in-out, filter 1.8s ease-in-out, opacity 1.8s ease-in-out;
+  }
+
+  /* ─── Media Queries ─────────────────────────────────────────────────── */
+  @media (max-width: 768px) {
+    .metric-sep { display: none; }
+    .metrics-inner { flex-direction: column; gap: 0.6rem; }
+    .intro-progress-row { width: 200px; }
+    .hud-top-right { display: none; }
+  }
+
+  /* Reduced Motion */
+  @media (prefers-reduced-motion: reduce) {
+    #tjenko-intro,
+    .intro-bottom-bar,
+    .intro-enter-btn,
+    .intro-action-container {
+      animation-duration: 0.01ms !important;
+      animation-delay: 0.01ms !important;
+      transition: none !important;
+    }
+    #tjenko-intro { clip-path: none !important; }
+
+
+  }
+</style>
+
+<!-- ═══════════════════════════════════════════════════════════════════════ -->
+<!--  CLIENT SCRIPT                                                          -->
+<!-- ═══════════════════════════════════════════════════════════════════════ -->
+<script>
+(function () {
+  'use strict';
+
+  if (sessionStorage.getItem('tjenko-intro-done') === 'true') {
+    const intro = document.getElementById('tjenko-intro');
+    if (intro) intro.remove();
+    return;
+  }
+
+  const intro = document.getElementById('tjenko-intro');
+  if (!intro) return;
+
+  // ── Full-Viewport Isometric Voxel Cityscape ────────────────────────
+  function initCityscape() {
+    const canvas = document.getElementById('tjenko-city-canvas');
+    if (!canvas || typeof THREE === 'undefined') return;
+
+    const scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x001233);
+
+    // ── Atmospheric Fog ──
+    scene.fog = new THREE.FogExp2(0x001233, 0.025);
+
+    // Orthographic camera for clean isometric view
+    const aspect = window.innerWidth / window.innerHeight;
+    const frustumSize = 13;
+    const camera = new THREE.OrthographicCamera(
+      frustumSize * aspect / -2, frustumSize * aspect / 2,
+      frustumSize / 2, frustumSize / -2,
+      0.1, 200
+    );
+    camera.position.set(14, 14, 14);
+    camera.lookAt(0, 0, 0);
+
+    const renderer = new THREE.WebGLRenderer({
+      canvas: canvas,
+      antialias: true,
+      alpha: false
+    });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+
+    // ── Materials ──
+    const blueMat = new THREE.MeshStandardMaterial({ color: 0x0052F5, roughness: 0.45, metalness: 0.1 });
+    const darkBlueMat = new THREE.MeshStandardMaterial({ color: 0x003399, roughness: 0.5, metalness: 0.15 });
+    const ivoryMat = new THREE.MeshStandardMaterial({ color: 0xFFF8E7, roughness: 0.2, metalness: 0.0 });
+    const greenMat = new THREE.MeshStandardMaterial({ color: 0x91CB3E, roughness: 0.2, metalness: 0.0 });
+    const blackMat = new THREE.MeshStandardMaterial({ color: 0x010400, roughness: 0.5, metalness: 0.0 });
+    const traceGlowMat = new THREE.MeshBasicMaterial({ color: 0x91CB3E, transparent: true, opacity: 0.85 });
+
+    // Emissive glow material for block glow effect
+    const glowGreenMat = new THREE.MeshStandardMaterial({
+      color: 0x91CB3E,
+      roughness: 0.2,
+      metalness: 0.0,
+      emissive: 0x91CB3E,
+      emissiveIntensity: 0
+    });
+    const glowBlueMat = new THREE.MeshStandardMaterial({
+      color: 0x0052F5,
+      roughness: 0.45,
+      metalness: 0.1,
+      emissive: 0x4488FF,
+      emissiveIntensity: 0
+    });
+
+    const mats = [blueMat, blueMat, blueMat, darkBlueMat, ivoryMat, ivoryMat, greenMat];
+    const sceneGroup = new THREE.Group();
+    scene.add(sceneGroup);
+
+    // Block tracking for pop-in animation
+    const allBlocks = [];
+    const sceneStartTime = performance.now();
+
+    // Blocks that will pulse height after pop-in
+    const pulsingBlocks = [];
+    // Blocks that will glow
+    const glowingBlocks = [];
+
+    // ── Ground Plane ──
+    const groundGeo = new THREE.BoxGeometry(28, 0.12, 28);
+    const ground = new THREE.Mesh(groundGeo, new THREE.MeshStandardMaterial({ color: 0x001a44, roughness: 0.8 }));
+    ground.position.y = -0.06;
+    ground.receiveShadow = true;
+    sceneGroup.add(ground);
+
+    // ── Cityscape Blocks ──
+    const gridHalf = 11;
+    const channelPositions = new Set([-7, 0, 7]);
+    const logoMinBound = -3;
+    const logoMaxBound = 3;
+
+    function seededRandom(x, z) {
+      const n = Math.sin(x * 127.1 + z * 311.7) * 43758.5453;
+      return n - Math.floor(n);
+    }
+
+
+
+    for (let x = -gridHalf; x <= gridHalf; x++) {
+      for (let z = -gridHalf; z <= gridHalf; z++) {
+        // Skip channel rows (for circuit traces)
+        if (channelPositions.has(x) || channelPositions.has(z)) continue;
+
+        // Skip central logo area
+        if (x >= logoMinBound && x <= logoMaxBound && z >= logoMinBound && z <= logoMaxBound) continue;
+
+        const dist = Math.sqrt(x * x + z * z);
+        const r = seededRandom(x, z);
+
+        // Height varies: taller at edges, shorter near center
+        const baseHeight = 0.3 + dist * 0.18 + r * 1.8;
+        const height = Math.min(Math.max(baseHeight, 0.4), 5.0);
+
+        // Pick material — some blocks get glow materials
+        let mat;
+        const matIdx = Math.floor(r * 97) % mats.length;
+        const shouldGlow = r > 0.85; // ~15% of blocks can glow
+        if (shouldGlow && matIdx >= 4) {
+          mat = glowGreenMat.clone();
+        } else if (shouldGlow && matIdx < 4) {
+          mat = glowBlueMat.clone();
+        } else {
+          mat = mats[matIdx];
+        }
+
+        const geo = new THREE.BoxGeometry(0.82, height, 0.82);
+        const mesh = new THREE.Mesh(geo, mat);
+        mesh.position.set(x, height / 2, z);
+        mesh.castShadow = true;
+        mesh.receiveShadow = true;
+        mesh.scale.set(0, 0, 0);
+        sceneGroup.add(mesh);
+
+        const delay = dist * 55 + r * 250;
+        allBlocks.push({ mesh, delay, done: false });
+
+
+
+        // Select ~8% of blocks for height pulsing
+        if (r > 0.92) {
+          pulsingBlocks.push({
+            mesh: mesh,
+            baseHeight: height,
+            phase: r * Math.PI * 2,
+            speed: 0.8 + r * 1.2,
+            amplitude: 0.08 + r * 0.12
+          });
+        }
+
+        // Track glowing blocks
+        if (shouldGlow) {
+          glowingBlocks.push({
+            material: mat,
+            phase: r * Math.PI * 2,
+            speed: 0.5 + r * 1.5
+          });
+        }
+      }
+    }
+
+    // ── Central Tjenko Logo Monogram ──
+    const logoGroup = new THREE.Group();
+    logoGroup.position.set(0, 0, 0);
+    logoGroup.rotation.y = 0; // Keep base logo orientation unrotated (so staircase is on the right)
+    sceneGroup.add(logoGroup);
+
+    // Logo platform
+    const platformGeo = new THREE.BoxGeometry(6.5, 0.4, 6.5);
+    const platform = new THREE.Mesh(platformGeo, blueMat);
+    platform.position.y = 0.2;
+    platform.receiveShadow = true;
+    platform.castShadow = true;
+    platform.scale.set(0, 0, 0);
+    logoGroup.add(platform);
+    allBlocks.push({ mesh: platform, delay: 50, done: false });
+
+    const cubeGeo = new THREE.BoxGeometry(0.95, 0.95, 0.95);
+
+    // Ivory blocks (cross pattern)
+    const ivoryCoords = [
+      [-0.5, 3], [0.5, 3],
+      [-1.5, 2], [-0.5, 2], [0.5, 2], [1.5, 2],
+      [-2.5, 1], [-2.5, 0], [-2.5, -1], [-2.5, -2],
+      [2.5, 1], [2.5, 0],
+      [-1.5, -2.5], [-0.5, -2.5], [0.5, -2.5], [1.5, -2.5],
+      [-0.5, -3], [0.5, -3]
+    ];
+
+    ivoryCoords.forEach(function(coords) {
+      var px = coords[0];
+      var pz = coords[1];
+      var mesh = new THREE.Mesh(cubeGeo, ivoryMat);
+      mesh.position.set(px, 0.9, pz);
+      mesh.castShadow = true;
+      mesh.receiveShadow = true;
+      mesh.scale.set(0, 0, 0);
+      logoGroup.add(mesh);
+      var d = Math.sqrt(px * px + pz * pz);
+      allBlocks.push({ mesh: mesh, delay: 200 + d * 40, done: false });
+    });
+
+    // Green staircase blocks
+    var greenCoords = [
+      [2.5, -0.5],
+      [2.5, -1.5], [3.5, -1.5],
+      [3.5, -2.5]
+    ];
+
+    greenCoords.forEach(function(coords) {
+      var px = coords[0];
+      var pz = coords[1];
+      var mesh = new THREE.Mesh(cubeGeo, greenMat);
+      mesh.position.set(px, 0.9, pz);
+      mesh.castShadow = true;
+      mesh.receiveShadow = true;
+      mesh.scale.set(0, 0, 0);
+      logoGroup.add(mesh);
+      allBlocks.push({ mesh: mesh, delay: 350 + Math.abs(px) * 30, done: false });
+    });
+
+    // Central green block (elevated)
+    var centerGreenGeo = new THREE.BoxGeometry(2.8, 0.95, 2.8);
+    var centerGreenMesh = new THREE.Mesh(centerGreenGeo, greenMat);
+    centerGreenMesh.position.set(0, 1.4, 0);
+    centerGreenMesh.castShadow = true;
+    centerGreenMesh.receiveShadow = true;
+    centerGreenMesh.scale.set(0, 0, 0);
+    logoGroup.add(centerGreenMesh);
+    allBlocks.push({ mesh: centerGreenMesh, delay: 500, done: false });
+
+    // Black T glyph on top
+    var tGroup = new THREE.Group();
+    tGroup.position.set(0, 1.9, 0);
+    tGroup.rotation.y = Math.PI; // Rotate T glyph 180 deg to face the camera correctly
+
+    var crossbarGeo = new THREE.BoxGeometry(1.0, 0.15, 0.4);
+    var leftBar = new THREE.Mesh(crossbarGeo, blackMat);
+    leftBar.position.set(-0.55, 0, 0.5);
+    leftBar.castShadow = true;
+    tGroup.add(leftBar);
+
+    var rightBar = new THREE.Mesh(crossbarGeo, blackMat);
+    rightBar.position.set(0.55, 0, 0.5);
+    rightBar.castShadow = true;
+    tGroup.add(rightBar);
+
+    var stemGeo = new THREE.BoxGeometry(0.45, 0.15, 1.3);
+    var stem = new THREE.Mesh(stemGeo, blackMat);
+    stem.position.set(0, 0, -0.2);
+    stem.castShadow = true;
+    tGroup.add(stem);
+
+    tGroup.scale.set(0, 0, 0);
+    logoGroup.add(tGroup);
+    allBlocks.push({ mesh: tGroup, delay: 700, done: false });
+
+    // ── Circuit Traces (Green Glow Lines) ──
+    var traceChannels = [-7, 0, 7];
+    var traceMeshes = [];
+
+    traceChannels.forEach(function(pos) {
+      // X-axis traces
+      var traceXGeo = new THREE.BoxGeometry(24, 0.06, 0.18);
+      var traceXMat = traceGlowMat.clone();
+      var traceX = new THREE.Mesh(traceXGeo, traceXMat);
+      traceX.position.set(0, 0.04, pos);
+      sceneGroup.add(traceX);
+      traceMeshes.push(traceXMat);
+
+      // Secondary thinner trace
+      var traceX2Geo = new THREE.BoxGeometry(24, 0.04, 0.08);
+      var traceX2 = new THREE.Mesh(traceX2Geo, traceXMat);
+      traceX2.position.set(0, 0.04, pos + 0.35);
+      sceneGroup.add(traceX2);
+
+      // Z-axis traces
+      var traceZGeo = new THREE.BoxGeometry(0.18, 0.06, 24);
+      var traceZMat = traceGlowMat.clone();
+      var traceZ = new THREE.Mesh(traceZGeo, traceZMat);
+      traceZ.position.set(pos, 0.04, 0);
+      sceneGroup.add(traceZ);
+      traceMeshes.push(traceZMat);
+
+      var traceZ2Geo = new THREE.BoxGeometry(0.08, 0.04, 24);
+      var traceZ2 = new THREE.Mesh(traceZ2Geo, traceZMat);
+      traceZ2.position.set(pos - 0.35, 0.04, 0);
+      sceneGroup.add(traceZ2);
+    });
+
+    // ── Small T stamps on random blocks ──
+    var stampGeo = new THREE.BoxGeometry(0.3, 0.06, 0.3);
+    for (var si = 0; si < 8; si++) {
+      var sx = Math.round(seededRandom(si * 3, si * 7) * 18 - 9);
+      var sz = Math.round(seededRandom(si * 11, si * 5) * 18 - 9);
+      if (channelPositions.has(sx) || channelPositions.has(sz)) continue;
+      if (Math.abs(sx) <= 3 && Math.abs(sz) <= 3) continue;
+      var stampMesh = new THREE.Mesh(stampGeo, blackMat);
+      var stampH = 0.3 + Math.sqrt(sx * sx + sz * sz) * 0.18 + seededRandom(sx, sz) * 1.8;
+      stampMesh.position.set(sx, Math.min(stampH, 5.0) + 0.03, sz);
+      sceneGroup.add(stampMesh);
+    }
+
+
+
+    // ── Lighting ──
+    var ambientLight = new THREE.AmbientLight(0xffffff, 0.35);
+    scene.add(ambientLight);
+
+    var dirLight = new THREE.DirectionalLight(0xffffff, 1.15);
+    dirLight.position.set(-10, 18, 12);
+    dirLight.castShadow = true;
+    dirLight.shadow.mapSize.width = 2048;
+    dirLight.shadow.mapSize.height = 2048;
+    dirLight.shadow.camera.near = 0.5;
+    dirLight.shadow.camera.far = 50;
+    var dShadow = 15;
+    dirLight.shadow.camera.left = -dShadow;
+    dirLight.shadow.camera.right = dShadow;
+    dirLight.shadow.camera.top = dShadow;
+    dirLight.shadow.camera.bottom = -dShadow;
+    scene.add(dirLight);
+
+    // Green-tinted rim light for atmosphere
+    var rimLight = new THREE.DirectionalLight(0x91CB3E, 0.25);
+    rimLight.position.set(6, 4, -10);
+    scene.add(rimLight);
+
+    // Blue fill light
+    var fillLight = new THREE.DirectionalLight(0x0052F5, 0.15);
+    fillLight.position.set(-6, 2, -6);
+    scene.add(fillLight);
+
+    // ── Camera Parallax State ──
+    var camTargetX = 0;
+    var camTargetY = 0;
+
+    canvas.addEventListener('mousemove', function(e) {
+      camTargetX = ((e.clientX / window.innerWidth) - 0.5) * 2;
+      camTargetY = ((e.clientY / window.innerHeight) - 0.5) * 2;
+    });
+    canvas.addEventListener('mouseleave', function() {
+      camTargetX = 0;
+      camTargetY = 0;
+    });
+
+    // ── Rendering Overdrive State ──
+    var isBooting = false;
+    var bootSpeed = 0;
+
+    // ── Smooth Camera Orbit State ──
+    var orbitAngle = 0;
+    var orbitRadius = 19.8; // sqrt(14^2 + 14^2) ≈ 19.8
+    var orbitHeight = 14;
+
+    // ── Animation Loop ──
+    var targetVec = { x: 1, y: 1, z: 1 };
+
+    function animate() {
+      requestAnimationFrame(animate);
+
+      var elapsed = performance.now() - sceneStartTime;
+      var time = elapsed * 0.001; // time in seconds
+
+      // Block pop-in
+      for (var i = 0; i < allBlocks.length; i++) {
+        var b = allBlocks[i];
+        if (!b.done && elapsed > b.delay) {
+          var s = b.mesh.scale;
+          s.x += (1 - s.x) * 0.1;
+          s.y += (1 - s.y) * 0.1;
+          s.z += (1 - s.z) * 0.1;
+          if (s.x > 0.995) {
+            s.set(1, 1, 1);
+            b.done = true;
+          }
+        }
+      }
+
+      // Circuit trace pulse
+      var pulseVal = 0.55 + Math.sin(elapsed * 0.003) * 0.35;
+      for (var t = 0; t < traceMeshes.length; t++) {
+        traceMeshes[t].opacity = pulseVal;
+      }
+
+      // ── Dynamic Block Height Pulsing ──
+      for (var pi = 0; pi < pulsingBlocks.length; pi++) {
+        var pb = pulsingBlocks[pi];
+        var scaleY = 1 + Math.sin(time * pb.speed + pb.phase) * pb.amplitude;
+        pb.mesh.scale.y = Math.max(pb.mesh.scale.y === 0 ? 0 : scaleY, 0.01);
+      }
+
+      // ── Block Glow Emission ──
+      for (var gi = 0; gi < glowingBlocks.length; gi++) {
+        var gb = glowingBlocks[gi];
+        // Pulsing emissive intensity: oscillates between 0 and 0.8
+        var glowIntensity = Math.max(0, Math.sin(time * gb.speed + gb.phase) * 0.5 + 0.15);
+        gb.material.emissiveIntensity = glowIntensity;
+      }
+
+
+
+      if (isBooting) {
+        bootSpeed += 0.002;
+        sceneGroup.rotation.y += 0.015 + bootSpeed;
+      } else {
+        // ── Smooth Camera Orbit ──
+        orbitAngle += 0.0006; // Smooth arc speed
+        var smoothX = Math.sin(orbitAngle) * orbitRadius;
+        var smoothZ = Math.cos(orbitAngle) * orbitRadius;
+
+        // Apply parallax on top of orbit
+        camera.position.x = smoothX + camTargetX * 1.5;
+        camera.position.z = smoothZ - camTargetY * 1.5;
+        camera.position.y = orbitHeight + Math.sin(orbitAngle * 0.7) * 0.5;
+        camera.lookAt(0, 0, 0);
+      }
+
+      renderer.render(scene, camera);
+    }
+
+    animate();
+
+    // Boot trigger
+    window._tjenkoBoot = function() {
+      isBooting = true;
+    };
+
+    // Resize
+    window.addEventListener('resize', function() {
+      var w = window.innerWidth;
+      var h = window.innerHeight;
+      var a = w / h;
+      camera.left = frustumSize * a / -2;
+      camera.right = frustumSize * a / 2;
+      camera.top = frustumSize / 2;
+      camera.bottom = frustumSize / -2;
+      camera.updateProjectionMatrix();
+      renderer.setSize(w, h);
+    });
+  }
+
+  // Run on load
+  if (document.readyState === 'complete') {
+    initCityscape();
+  } else {
+    window.addEventListener('load', initCityscape);
+  }
+
+  // ── Mouse Parallax for HTML overlay layers ─────────────────────────
+  window.addEventListener('mousemove', function(e) {
+    var mx = (e.clientX / window.innerWidth) - 0.5;
+    var my = (e.clientY / window.innerHeight) - 0.5;
+    intro.style.setProperty('--mx', mx.toFixed(3));
+    intro.style.setProperty('--my', my.toFixed(3));
+  });
+
+  // ── Progress Counter Animation with Spark Effect ──────────────────
+  var progressFill = document.getElementById('intro-progress-fill');
+  var progressPct = document.getElementById('intro-progress-pct');
+  var progressSpark = document.getElementById('intro-progress-spark');
+  if (progressFill && progressPct) {
+    var currentPct = 0;
+    var targetPct = 96;
+
+    // Show spark once progress starts
+    if (progressSpark) {
+      setTimeout(function() {
+        progressSpark.style.opacity = '1';
+      }, 1300);
+    }
+
+    var progressInterval = setInterval(function() {
+      currentPct += 1;
+      if (currentPct > targetPct) {
+        clearInterval(progressInterval);
+        // Hide spark when done
+        if (progressSpark) progressSpark.style.opacity = '0';
+        return;
+      }
+      progressFill.style.width = currentPct + '%';
+      progressPct.textContent = currentPct + '%';
+
+      // Randomize spark direction each tick
+      if (progressSpark) {
+        var dx = (Math.random() * 6 - 1) + 'px';
+        var dy = (-4 - Math.random() * 10) + 'px';
+        var dx2 = (Math.random() * 8) + 'px';
+        var dy2 = (-8 - Math.random() * 12) + 'px';
+        progressSpark.style.setProperty('--spark-dx', dx);
+        progressSpark.style.setProperty('--spark-dy', dy);
+        progressSpark.style.setProperty('--spark-dx2', dx2);
+        progressSpark.style.setProperty('--spark-dy2', dy2);
+      }
+    }, 35);
+  }
+
+  // ── FPS Jitter ─────────────────────────────────────────────────────
+  var fpsEl = document.getElementById('hud-fps-text');
+  if (fpsEl) {
+    setInterval(function() {
+      var fps = (59.6 + Math.random() * 0.6).toFixed(1);
+      fpsEl.textContent = 'TX_SYS_OK // FPS: ' + fps;
+    }, 1100);
+  }
+
+  // ── Dismiss Sequence ───────────────────────────────────────────────
+  var dismissed = false;
+
+  function dismiss() {
+    if (dismissed) return;
+    dismissed = true;
+
+    try {
+      sessionStorage.setItem('tjenko-intro-done', 'true');
+    } catch (e) {
+      console.warn("sessionStorage is not accessible:", e);
+    }
+
+    intro.classList.add('intro-exiting');
+    document.documentElement.classList.remove('tjenko-intro-active');
+    document.documentElement.classList.add('tjenko-intro-done');
+
+    setTimeout(function() {
+      intro.remove();
+    }, 750);
+  }
+
+  var enterBtn = document.getElementById('intro-enter-btn');
+  if (enterBtn) {
+    enterBtn.addEventListener('click', function(e) {
+      e.stopPropagation();
+      if (enterBtn.classList.contains('loading')) return;
+
+      enterBtn.classList.add('loading');
+      intro.classList.add('intro-rendering');
+
+      // Trigger 3D boot overdrive
+      if (window._tjenkoBoot) window._tjenkoBoot();
+
+      // Update progress to 100%
+      if (progressFill && progressPct) {
+        progressFill.style.width = '100%';
+        progressPct.textContent = '100%';
+      }
+
+      var btnText = enterBtn.querySelector('.btn-text');
+      if (btnText) {
+        var steps = [
+          "CONVERGING AI AGENTS...",
+          "ESTABLISHING SECURE CHANNELS...",
+          "ENCRYPTING NODE SOCKETS...",
+          "NETWORK BOOTED!"
+        ];
+        var stepIndex = 0;
+        btnText.textContent = steps[0];
+        var textInterval = setInterval(function() {
+          stepIndex++;
+          if (stepIndex < steps.length) {
+            btnText.textContent = steps[stepIndex];
+          } else {
+            clearInterval(textInterval);
+          }
+        }, 400);
+      }
+
+      setTimeout(function() {
+        dismiss();
+      }, 1800);
+    });
+  }
+
+  // ── Count-up Metrics ───────────────────────────────────────────────
+  function countUp(el, target, duration, suffix) {
+    suffix = suffix || '';
+    var start = performance.now();
+    function tick(now) {
+      var elapsed = Math.min((now - start) / duration, 1);
+      var eased = 1 - Math.pow(1 - elapsed, 3);
+      var current = Math.round(eased * target);
+      el.textContent = current.toLocaleString() + suffix;
+      if (elapsed < 1) {
+        requestAnimationFrame(tick);
+      }
+    }
+    requestAnimationFrame(tick);
+  }
+
+  setTimeout(function() {
+    var statElements = intro.querySelectorAll('.metric-num[data-target]');
+    statElements.forEach(function(el) {
+      var target = parseInt(el.getAttribute('data-target') || '0', 10);
+      var suffix = el.getAttribute('data-suffix') || '';
+      countUp(el, target, 1500, suffix);
+    });
+  }, 2400);
+
+})();
+</script>

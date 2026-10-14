@@ -27,9 +27,25 @@
 
       {/* ── Right Column: System Panel ── */}
       <div class="flex justify-center lg:justify-end">
-        <div class="panel-spectrum shadow-brutal-lg w-full max-w-md lg:max-w-lg aspect-square relative p-6 md:p-8 select-none">
+        <div id="hero-spectrum-panel" class="panel-spectrum shadow-brutal-lg w-full max-w-md lg:max-w-lg aspect-square relative p-6 md:p-8 select-none overflow-hidden group">
 
-          {/* ── SVG Connection Lines ── */}
+          {/* ── Cursor Parallax Radial Glow ── */}
+          <div class="panel-spectrum-glow" aria-hidden="true"></div>
+
+          {/* ── Dotted Screen Matrix grid overlay ── */}
+          <div class="panel-grid-matrix" aria-hidden="true"></div>
+
+          {/* ── Broadcast Ripples ── */}
+          <div class="broadcast-circle circle-1" aria-hidden="true"></div>
+          <div class="broadcast-circle circle-2" aria-hidden="true"></div>
+
+          {/* ── Screen Border Corners ── */}
+          <span class="panel-corner p-tl" aria-hidden="true"></span>
+          <span class="panel-corner p-tr" aria-hidden="true"></span>
+          <span class="panel-corner p-bl" aria-hidden="true"></span>
+          <span class="panel-corner p-br" aria-hidden="true"></span>
+
+          {/* ── SVG Connection Lines and Central Monogram ── */}
           <svg
             class="absolute inset-0 w-full h-full pointer-events-none"
             viewBox="0 0 400 400"
@@ -37,78 +53,162 @@
             preserveAspectRatio="xMidYMid meet"
             aria-hidden="true"
           >
+            <!-- Central Tjenko Monogram Pixel Art (aligned to grid center 200,200) -->
+            <g id="hero-center-monogram" class="transition-all duration-700 ease-out origin-center" style="transform-origin: 200px 200px;">
+              <!-- Central Green Square -->
+              <rect x="182" y="182" width="36" height="36" fill="#91CB3E" />
+              <!-- Ivory Blocks -->
+              <rect x="188" y="152" width="12" height="12" fill="#FFF8E7" />
+              <rect x="200" y="152" width="12" height="12" fill="#FFF8E7" />
+              <rect x="176" y="164" width="12" height="12" fill="#FFF8E7" />
+              <rect x="188" y="164" width="12" height="12" fill="#FFF8E7" />
+              <rect x="200" y="164" width="12" height="12" fill="#FFF8E7" />
+              <rect x="212" y="164" width="12" height="12" fill="#FFF8E7" />
+              <rect x="164" y="176" width="12" height="12" fill="#FFF8E7" />
+              <rect x="164" y="188" width="12" height="12" fill="#FFF8E7" />
+              <rect x="164" y="200" width="12" height="12" fill="#FFF8E7" />
+              <rect x="164" y="212" width="12" height="12" fill="#FFF8E7" />
+              <rect x="224" y="176" width="12" height="12" fill="#FFF8E7" />
+              <rect x="224" y="188" width="12" height="12" fill="#FFF8E7" />
+              <rect x="176" y="224" width="12" height="12" fill="#FFF8E7" />
+              <rect x="188" y="224" width="12" height="12" fill="#FFF8E7" />
+              <rect x="200" y="224" width="12" height="12" fill="#FFF8E7" />
+              <rect x="212" y="224" width="12" height="12" fill="#FFF8E7" />
+              <rect x="188" y="236" width="12" height="12" fill="#FFF8E7" />
+              <rect x="200" y="236" width="12" height="12" fill="#FFF8E7" />
+              <!-- Green Staircase Blocks -->
+              <rect x="224" y="200" width="12" height="12" fill="#91CB3E" />
+              <rect x="224" y="212" width="12" height="12" fill="#91CB3E" />
+              <rect x="236" y="212" width="12" height="12" fill="#91CB3E" />
+              <rect x="236" y="224" width="12" height="12" fill="#91CB3E" />
+              <rect x="248" y="224" width="12" height="12" fill="#91CB3E" />
+              <rect x="248" y="236" width="12" height="12" fill="#91CB3E" />
+              <rect x="260" y="236" width="12" height="12" fill="#91CB3E" />
+              <!-- Central Black "T" Glyph -->
+              <rect x="186.5" y="188.9" width="12.6" height="5.4" fill="#010400" />
+              <rect x="200.9" y="188.9" width="12.6" height="5.4" fill="#010400" />
+              <rect x="197" y="194" width="6" height="18" fill="#010400" />
+              <rect x="190.1" y="194" width="5.4" height="4.8" fill="#010400" />
+              <rect x="204.5" y="199.4" width="5.4" height="4.8" fill="#010400" />
+            </g>
+
             {/* Dashed connection lines between nodes through center */}
             {/* Top-left → center */}
-            <line x1="90" y1="85" x2="200" y2="200" stroke="#FFF8E7" stroke-width="1.5" stroke-dasharray="6 4" opacity="0.45" />
+            <line class="hero-net-line-fast line-tl" x1="90" y1="85" x2="200" y2="200" stroke="#FFF8E7" stroke-width="1.5" stroke-dasharray="6 4" opacity="0.45" />
             {/* Top-right → center */}
-            <line x1="310" y1="85" x2="200" y2="200" stroke="#FFF8E7" stroke-width="1.5" stroke-dasharray="6 4" opacity="0.45" />
+            <line class="hero-net-line-fast line-tr" x1="310" y1="85" x2="200" y2="200" stroke="#FFF8E7" stroke-width="1.5" stroke-dasharray="6 4" opacity="0.45" />
             {/* Bottom-left → center */}
-            <line x1="90" y1="315" x2="200" y2="200" stroke="#FFF8E7" stroke-width="1.5" stroke-dasharray="6 4" opacity="0.45" />
+            <line class="hero-net-line-fast line-bl" x1="90" y1="315" x2="200" y2="200" stroke="#FFF8E7" stroke-width="1.5" stroke-dasharray="6 4" opacity="0.45" />
             {/* Bottom-right → center */}
-            <line x1="310" y1="315" x2="200" y2="200" stroke="#FFF8E7" stroke-width="1.5" stroke-dasharray="6 4" opacity="0.45" />
+            <line class="hero-net-line-fast line-br" x1="310" y1="315" x2="200" y2="200" stroke="#FFF8E7" stroke-width="1.5" stroke-dasharray="6 4" opacity="0.45" />
             {/* Horizontal: top-left ↔ top-right */}
-            <line x1="120" y1="65" x2="280" y2="65" stroke="#91CB3E" stroke-width="1.5" stroke-dasharray="4 6" opacity="0.55" />
+            <line class="hero-net-line-slow" x1="120" y1="65" x2="280" y2="65" stroke="#91CB3E" stroke-width="1.5" stroke-dasharray="4 6" opacity="0.55" />
             {/* Horizontal: bottom-left ↔ bottom-right */}
-            <line x1="120" y1="335" x2="280" y2="335" stroke="#91CB3E" stroke-width="1.5" stroke-dasharray="4 6" opacity="0.55" />
+            <line class="hero-net-line-slow" x1="120" y1="335" x2="280" y2="335" stroke="#91CB3E" stroke-width="1.5" stroke-dasharray="4 6" opacity="0.55" />
             {/* Vertical: top-left ↔ bottom-left */}
-            <line x1="65" y1="110" x2="65" y2="290" stroke="#FFF8E7" stroke-width="1" stroke-dasharray="3 5" opacity="0.3" />
+            <line class="hero-net-line-slow" x1="65" y1="110" x2="65" y2="290" stroke="#FFF8E7" stroke-width="1" stroke-dasharray="3 5" opacity="0.3" />
             {/* Vertical: top-right ↔ bottom-right */}
-            <line x1="335" y1="110" x2="335" y2="290" stroke="#FFF8E7" stroke-width="1" stroke-dasharray="3 5" opacity="0.3" />
+            <line class="hero-net-line-slow" x1="335" y1="110" x2="335" y2="290" stroke="#FFF8E7" stroke-width="1" stroke-dasharray="3 5" opacity="0.3" />
+
+            {/* Glowing packets marching along paths */}
+            <rect class="packet-tl transition-all duration-300" x="-3.5" y="-3.5" width="7" height="7" fill="#91CB3E" stroke="#010400" stroke-width="1.2" opacity="0.9">
+              <animateMotion dur="2.8s" repeatCount="indefinite" path="M90 85 L200 200" />
+            </rect>
+            <rect class="packet-tr transition-all duration-300" x="-3.5" y="-3.5" width="7" height="7" fill="#91CB3E" stroke="#010400" stroke-width="1.2" opacity="0.9">
+              <animateMotion dur="3.5s" repeatCount="indefinite" path="M310 85 L200 200" />
+            </rect>
+            <rect class="packet-bl transition-all duration-300" x="-3.5" y="-3.5" width="7" height="7" fill="#91CB3E" stroke="#010400" stroke-width="1.2" opacity="0.9">
+              <animateMotion dur="4.2s" repeatCount="indefinite" path="M90 315 L200 200" />
+            </rect>
+            <rect class="packet-br transition-all duration-300" x="-3.5" y="-3.5" width="7" height="7" fill="#91CB3E" stroke="#010400" stroke-width="1.2" opacity="0.9">
+              <animateMotion dur="3.1s" repeatCount="indefinite" path="M310 315 L200 200" />
+            </rect>
+
+            {/* Glowing peripheral loop packets */}
+            <rect class="transition-all duration-300" x="-3" y="-3" width="6" height="6" fill="#91CB3E" stroke="#010400" stroke-width="1" opacity="0.75">
+              <animateMotion dur="5.5s" repeatCount="indefinite" path="M120 65 L280 65" />
+            </rect>
+            <rect class="transition-all duration-300" x="-3" y="-3" width="6" height="6" fill="#91CB3E" stroke="#010400" stroke-width="1" opacity="0.75">
+              <animateMotion dur="6s" repeatCount="indefinite" path="M280 335 L120 335" />
+            </rect>
+            <rect class="transition-all duration-300" x="-2.5" y="-2.5" width="5" height="5" fill="#91CB3E" stroke="#010400" stroke-width="0.8" opacity="0.6">
+              <animateMotion dur="7s" repeatCount="indefinite" path="M65 110 L65 290" />
+            </rect>
+            <rect class="transition-all duration-300" x="-2.5" y="-2.5" width="5" height="5" fill="#91CB3E" stroke="#010400" stroke-width="0.8" opacity="0.6">
+              <animateMotion dur="7.5s" repeatCount="indefinite" path="M335 290 L335 110" />
+            </rect>
           </svg>
 
-          {/* ── Central "T" Glyph ── */}
-          <div class="absolute inset-0 flex items-center justify-center pointer-events-none" aria-hidden="true">
-            <span class="font-display text-[7rem] md:text-[9rem] font-black text-ivory/15 leading-none select-none">
-              T
-            </span>
-          </div>
-
-          {/* ── Status Label ── */}
-          <div class="absolute top-4 left-4 md:top-6 md:left-6 flex items-center gap-2">
+          {/* ── Status Label (Top-Left) ── */}
+          <div class="absolute top-4 left-4 md:top-6 md:left-6 flex items-center gap-2 z-10 select-none">
             <span class="inline-block w-2 h-2 bg-green border-[1.5px] border-black animate-pulse"></span>
-            <span class="font-mono text-[10px] font-bold uppercase tracking-[0.14em] text-ivory/80">
+            <span id="hero-status-log" class="font-mono text-[10px] font-bold uppercase tracking-[0.14em] text-ivory/80 transition-opacity duration-200">
               Live · 4 active nodes
             </span>
           </div>
 
+          {/* ── Telemetry Monitor (Top-Right) ── */}
+          <div class="absolute top-4 right-4 md:top-6 md:right-6 z-10 select-none">
+            <span id="hero-sys-loc" class="font-mono text-[9px] md:text-[10px] font-bold uppercase tracking-wider text-ivory/60">
+              [SYS_LOC: EVENT_STAGE_01]
+            </span>
+          </div>
+
+          {/* ── Performance Diagnostic (Bottom-Left) ── */}
+          <div class="absolute bottom-4 left-4 md:bottom-6 md:left-6 z-10 select-none">
+            <span id="hero-fps" class="font-mono text-[9px] md:text-[10px] font-bold uppercase tracking-wider text-ivory/60">
+              TX_SYS_OK // FPS: 60.0
+            </span>
+          </div>
+
           {/* ── Node: Top-Left — ALEX ── */}
-          <div class="hero-node top-[12%] left-[5%] md:top-[10%] md:left-[6%]">
-            <span class="hero-node-name">Alex</span>
+          <div class="hero-node node-tl top-[12%] left-[5%] md:top-[10%] md:left-[6%]">
+            <div class="flex items-center justify-between gap-3">
+              <span class="hero-node-name">Alex</span>
+              <span class="w-1.5 h-1.5 rounded-full bg-green border-[1px] border-black animate-pulse-fast"></span>
+            </div>
             <span class="hero-node-role">Marketing</span>
+            <span class="hero-node-loc font-mono text-[7px] font-bold tracking-wider opacity-60 mt-0.5 select-none">LOC: STG_01</span>
           </div>
 
           {/* ── Node: Top-Right — SAM ── */}
-          <div class="hero-node top-[12%] right-[5%] md:top-[10%] md:right-[6%]">
-            <span class="hero-node-name">Sam</span>
+          <div class="hero-node node-tr top-[12%] right-[5%] md:top-[10%] md:right-[6%]">
+            <div class="flex items-center justify-between gap-3">
+              <span class="hero-node-name">Sam</span>
+              <span class="w-1.5 h-1.5 rounded-full bg-green border-[1px] border-black animate-pulse-fast" style="animation-delay: 0.2s;"></span>
+            </div>
             <span class="hero-node-role">Design</span>
+            <span class="hero-node-loc font-mono text-[7px] font-bold tracking-wider opacity-60 mt-0.5 select-none">LOC: ROUT_03</span>
           </div>
 
           {/* ── Node: Bottom-Left — JORDAN ── */}
-          <div class="hero-node bottom-[12%] left-[5%] md:bottom-[10%] md:left-[6%]">
-            <span class="hero-node-name">Jordan</span>
+          <div class="hero-node node-bl bottom-[12%] left-[5%] md:bottom-[10%] md:left-[6%]">
+            <div class="flex items-center justify-between gap-3">
+              <span class="hero-node-name">Jordan</span>
+              <span class="w-1.5 h-1.5 rounded-full bg-green border-[1px] border-black animate-pulse-fast" style="animation-delay: 0.4s;"></span>
+            </div>
             <span class="hero-node-role">Engineering</span>
+            <span class="hero-node-loc font-mono text-[7px] font-bold tracking-wider opacity-60 mt-0.5 select-none">LOC: EXPO_02</span>
           </div>
 
           {/* ── Node: Bottom-Right — TAYLOR ── */}
-          <div class="hero-node bottom-[12%] right-[5%] md:bottom-[10%] md:right-[6%]">
-            <span class="hero-node-name">Taylor</span>
+          <div class="hero-node node-br bottom-[12%] right-[5%] md:bottom-[10%] md:right-[6%]">
+            <div class="flex items-center justify-between gap-3">
+              <span class="hero-node-name">Taylor</span>
+              <span class="w-1.5 h-1.5 rounded-full bg-green border-[1px] border-black animate-pulse-fast" style="animation-delay: 0.6s;"></span>
+            </div>
             <span class="hero-node-role">Product</span>
+            <span class="hero-node-loc font-mono text-[7px] font-bold tracking-wider opacity-60 mt-0.5 select-none">LOC: PLZA_W</span>
           </div>
 
-          {/* ── Green Signal Accents ── */}
-          <div class="absolute top-[38%] left-[22%] w-2.5 h-2.5 bg-green border-[1.5px] border-black" aria-hidden="true"></div>
-          <div class="absolute top-[30%] right-[30%] w-2 h-2 bg-green border-[1.5px] border-black" aria-hidden="true"></div>
-          <div class="absolute bottom-[35%] left-[35%] w-3 h-3 bg-green border-[2px] border-black" aria-hidden="true"></div>
-          <div class="absolute bottom-[28%] right-[20%] w-2 h-2 bg-green border-[1.5px] border-black" aria-hidden="true"></div>
-          <div class="absolute top-[55%] right-[42%] w-1.5 h-1.5 bg-green border-[1px] border-black" aria-hidden="true"></div>
-          <div class="absolute bottom-[48%] left-[18%] w-2 h-2 bg-green/70 border-[1.5px] border-black/60" aria-hidden="true"></div>
 
-          {/* ── Bottom Score Bar ── */}
-          <div class="absolute bottom-4 right-4 md:bottom-6 md:right-6 bg-black/30 px-3 py-1.5 flex items-center gap-2">
-            <span class="font-mono text-[10px] font-bold uppercase tracking-wider text-ivory/70">
+
+          {/* ── Bottom Score Bar (Bottom-Right) ── */}
+          <div class="absolute bottom-4 right-4 md:bottom-6 md:right-6 bg-black/30 px-3 py-1.5 flex items-center gap-2 z-10">
+            <span class="font-mono text-[10px] font-bold uppercase tracking-wider text-ivory/70 select-none">
               Match Score
             </span>
-            <span class="font-display text-sm font-black text-green">
+            <span id="hero-match-score" class="font-display text-sm font-black text-green transition-all duration-200">
               94%
             </span>
           </div>
@@ -119,27 +219,123 @@
 </section>
 
 <style>
+  .panel-grid-matrix {
+    position: absolute;
+    inset: 0;
+    background-image: radial-gradient(rgba(255, 248, 231, 0.12) 1.5px, transparent 1.5px);
+    background-size: 20px 20px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* Interactive Cursor Parallax Glow */
+  .panel-spectrum-glow {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: radial-gradient(circle at calc(50% + var(--hmx, 0) * 180px) calc(50% + var(--hmy, 0) * 180px), rgba(145, 203, 62, 0.22) 0%, transparent 60%);
+    z-index: 0;
+    transition: background 0.1s ease-out;
+    will-change: background;
+  }
+
+  .broadcast-circle {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 100px;
+    height: 100px;
+    margin: -50px 0 0 -50px;
+    border: 1.5px dashed rgba(255, 248, 231, 0.15);
+    border-radius: 50%;
+    pointer-events: none;
+    transform-origin: center;
+    z-index: 0;
+    animation: hero-broadcast 5s cubic-bezier(0.1, 0.8, 0.3, 1) infinite;
+  }
+  .circle-1 { animation-delay: 0s; }
+  .circle-2 { animation-delay: 2.5s; }
+
+  @keyframes hero-broadcast {
+    0% { transform: scale(0.5); opacity: 0; }
+    10% { opacity: 0.55; }
+    100% { transform: scale(3.5); opacity: 0; }
+  }
+
+  .panel-corner {
+    position: absolute;
+    width: 10px;
+    height: 10px;
+    border: 2px solid rgba(255, 248, 231, 0.35);
+    pointer-events: none;
+    z-index: 2;
+  }
+  .p-tl { top: 10px; left: 10px; border-right: none; border-bottom: none; }
+  .p-tr { top: 10px; right: 10px; border-left: none; border-bottom: none; }
+  .p-bl { bottom: 10px; left: 10px; border-right: none; border-top: none; }
+  .p-br { bottom: 10px; right: 10px; border-left: none; border-top: none; }
+
+  /* Dashed Console Inset Border Frame - Removed per user request */
+  .panel-spectrum {
+    position: relative;
+    overflow: hidden;
+  }
+
+  /* SVG Central Monogram Glow and Pulse */
+  #hero-center-monogram {
+    opacity: 0.15;
+    animation: monogram-pulse 4s ease-in-out infinite alternate;
+  }
+  .panel-spectrum:hover #hero-center-monogram {
+    opacity: 0.38;
+    transform: scale(1.06);
+  }
+  @keyframes monogram-pulse {
+    0% { opacity: 0.12; transform: scale(0.97); }
+    100% { opacity: 0.18; transform: scale(1.03); }
+  }
+
+  /* Hero Nodes Styles */
   .hero-node {
     position: absolute;
     background-color: var(--color-ivory);
     border: 2.5px solid var(--color-black);
     box-shadow: 3px 3px 0px var(--color-black);
-    padding: 0.5rem 0.75rem;
+    padding: 0.4rem 0.6rem;
     display: flex;
     flex-direction: column;
     gap: 1px;
-    transition: all 150ms ease;
-    min-width: 5rem;
+    transition: box-shadow 150ms ease, transform 150ms ease, border-color 150ms ease;
+    min-width: 5.5rem;
+    will-change: transform;
+    z-index: 5;
+  }
+
+  .node-tl { animation: hero-float-1 5s ease-in-out infinite alternate; }
+  .node-tr { animation: hero-float-2 6s ease-in-out infinite alternate; }
+  .node-bl { animation: hero-float-2 4.5s ease-in-out infinite alternate; }
+  .node-br { animation: hero-float-1 5.5s ease-in-out infinite alternate; }
+
+  @keyframes hero-float-1 {
+    0% { transform: translateY(0px) translate(calc(var(--hmx, 0) * 16px), calc(var(--hmy, 0) * 16px)); }
+    100% { transform: translateY(-4px) translate(calc(var(--hmx, 0) * 16px), calc(var(--hmy, 0) * 16px)); }
+  }
+
+  @keyframes hero-float-2 {
+    0% { transform: translateY(0px) translate(calc(var(--hmx, 0) * 16px), calc(var(--hmy, 0) * 16px)); }
+    100% { transform: translateY(4px) translate(calc(var(--hmx, 0) * 16px), calc(var(--hmy, 0) * 16px)); }
   }
 
   .hero-node:hover {
-    transform: translate(-2px, -2px);
-    box-shadow: 5px 5px 0px var(--color-black);
+    transform: translate(-3px, -3px) scale(1.04) !important;
+    box-shadow: 6px 6px 0px var(--color-black) !important;
+    border-color: var(--color-spectrum);
+    z-index: 10;
   }
 
   .hero-node-name {
     font-family: var(--font-display);
-    font-size: 0.8rem;
+    font-size: 0.75rem;
     font-weight: 900;
     text-transform: uppercase;
     color: var(--color-black);
@@ -149,11 +345,161 @@
 
   .hero-node-role {
     font-family: var(--font-mono);
-    font-size: 0.6rem;
+    font-size: 0.58rem;
     font-weight: 600;
     text-transform: uppercase;
-    letter-spacing: 0.12em;
+    letter-spacing: 0.1em;
     color: var(--color-spectrum);
     line-height: 1.2;
   }
+
+  .animate-pulse-fast {
+    animation: pulse-fast 1s ease-in-out infinite alternate;
+  }
+  @keyframes pulse-fast {
+    0% { opacity: 0.35; transform: scale(0.85); }
+    100% { opacity: 1; transform: scale(1.15); }
+  }
+
+  /* Marching line dashes */
+  .hero-net-line-fast {
+    stroke-dashoffset: 0;
+    animation: hero-line-march-fast 12s linear infinite;
+    transition: stroke 0.3s ease, stroke-width 0.3s ease, opacity 0.3s ease;
+  }
+  .hero-net-line-slow {
+    stroke-dashoffset: 0;
+    animation: hero-line-march-slow 22s linear infinite;
+  }
+
+  @keyframes hero-line-march-fast {
+    to { stroke-dashoffset: -40px; }
+  }
+  @keyframes hero-line-march-slow {
+    to { stroke-dashoffset: -40px; }
+  }
+
+
+
+  /* Dynamic hovering path highlights */
+  #hero-spectrum-panel.hover-node-tl .line-tl,
+  #hero-spectrum-panel.hover-node-tr .line-tr,
+  #hero-spectrum-panel.hover-node-bl .line-bl,
+  #hero-spectrum-panel.hover-node-br .line-br {
+    stroke: var(--color-green) !important;
+    stroke-width: 2.2px !important;
+    opacity: 0.95 !important;
+  }
+
+  #hero-spectrum-panel.hover-node-tl .packet-tl,
+  #hero-spectrum-panel.hover-node-tr .packet-tr,
+  #hero-spectrum-panel.hover-node-bl .packet-bl,
+  #hero-spectrum-panel.hover-node-br .packet-br {
+    fill: var(--color-ivory) !important;
+    transform: scale(1.6);
+    opacity: 1 !important;
+  }
 </style>
+
+<script>
+(function () {
+  'use strict';
+  
+  const panel = document.getElementById('hero-spectrum-panel');
+  if (!panel) return;
+
+  // 1. Mouse Parallax Tracker
+  panel.addEventListener('mousemove', (e) => {
+    const rect = panel.getBoundingClientRect();
+    // Normalize coordinates to range -0.5 to 0.5
+    const mx = (e.clientX - rect.left) / rect.width - 0.5;
+    const my = (e.clientY - rect.top) / rect.height - 0.5;
+
+    panel.style.setProperty('--hmx', mx.toFixed(3));
+    panel.style.setProperty('--hmy', my.toFixed(3));
+  });
+
+  panel.addEventListener('mouseleave', () => {
+    // Reset to center smoothly
+    panel.style.setProperty('--hmx', '0');
+    panel.style.setProperty('--hmy', '0');
+  });
+
+  // 2. Hover Highlight Connection Paths
+  const nodes = panel.querySelectorAll('.hero-node');
+  nodes.forEach(node => {
+    let nodeClass = '';
+    if (node.classList.contains('node-tl')) nodeClass = 'node-tl';
+    else if (node.classList.contains('node-tr')) nodeClass = 'node-tr';
+    else if (node.classList.contains('node-bl')) nodeClass = 'node-bl';
+    else if (node.classList.contains('node-br')) nodeClass = 'node-br';
+
+    node.addEventListener('mouseenter', () => {
+      if (nodeClass) panel.classList.add(`hover-${nodeClass}`);
+    });
+    node.addEventListener('mouseleave', () => {
+      if (nodeClass) panel.classList.remove(`hover-${nodeClass}`);
+    });
+  });
+
+  // 3. Telemetry updates (Locations & Jittery FPS)
+  const locEl = document.getElementById('hero-sys-loc');
+  const fpsEl = document.getElementById('hero-fps');
+  if (locEl) {
+    const locations = ["EVENT_STAGE_01", "HUB_ROUTER_03", "MAIN_PLAZA_WEST", "EXPO_HALL_02"];
+    setInterval(() => {
+      const nextLoc = locations[Math.floor(Math.random() * locations.length)];
+      locEl.textContent = `[SYS_LOC: ${nextLoc}]`;
+    }, 7000);
+  }
+  if (fpsEl) {
+    setInterval(() => {
+      const jitter = (59.7 + Math.random() * 0.5).toFixed(1);
+      fpsEl.textContent = `TX_SYS_OK // FPS: ${jitter}`;
+    }, 1200);
+  }
+
+  // 4. Score Fluctuation
+  const scoreEl = document.getElementById('hero-match-score');
+  if (scoreEl) {
+    let currentScore = 94;
+    setInterval(() => {
+      // Pick a random target score between 92 and 97
+      const targetScore = 92 + Math.floor(Math.random() * 6);
+      if (targetScore === currentScore) return;
+
+      const step = targetScore > currentScore ? 1 : -1;
+      const scoreInterval = setInterval(() => {
+        if (currentScore !== targetScore) {
+          currentScore += step;
+          scoreEl.textContent = currentScore + '%';
+        } else {
+          clearInterval(scoreInterval);
+        }
+      }, 100);
+    }, 4500);
+  }
+
+  // 5. Cycling Diagnostic Logs
+  const statusEl = document.getElementById('hero-status-log');
+  if (statusEl) {
+    const logs = [
+      "LIVE · 4 ACTIVE NODES",
+      "ALEX <-> SAM CONNECTED (94%)",
+      "ESTABLISHING ROUTE VIA JORDAN...",
+      "SYS.STATUS: OPTIMIZED",
+      "AI ENGINE ACTIVE",
+      "TAYLOR SYNCING CONNECTIONS..."
+    ];
+    let logIndex = 0;
+    setInterval(() => {
+      logIndex = (logIndex + 1) % logs.length;
+      statusEl.style.opacity = '0.2';
+      setTimeout(() => {
+        statusEl.textContent = logs[logIndex];
+        statusEl.style.opacity = '0.8';
+      }, 200);
+    }, 5500);
+  }
+})();
+</script>

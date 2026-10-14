@@ -1,5 +1,6 @@
 ---
 import MainLayout from '../layouts/MainLayout.astro';
+import IntroScreen from '../components/IntroScreen.astro';
 import Header from '../components/Header.astro';
 import Hero from '../components/Hero.astro';
 
@@ -8,6 +9,8 @@ import SignalSection from '../components/SignalSection.astro';
 ---
 
 <MainLayout>
+  <!-- Initialization screen — plays once per session, sits above all content -->
+  <IntroScreen />
   <Header />
   <main>
     <Hero />
